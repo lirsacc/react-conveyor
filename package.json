@@ -4,7 +4,6 @@
   "description": "",
   "scripts": {
     "build": "rm -rf dist && ./node_modules/.bin/rollup -c conf/rollup.config.js",
-    "lint": "./node_modules/.bin/eslint -c .eslintrc.json --ignore-path .gitignore --ext js,jsx src test",
     "test": "./node_modules/.bin/jest -c conf/jest.json",
     "test:with-coverage": "npm run test -- --coverage"
   },
