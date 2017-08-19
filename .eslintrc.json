@@ -59,6 +59,19 @@
         "eqeqeq": [
           "error",
           "allow-null"
+        ],
+        "max-len": [
+          "warn",
+          100,
+          2,
+          {
+            "ignoreComments": true,
+            "ignoreTrailingComments": true,
+            "ignoreStrings": true,
+            "ignoreTemplateLiterals": true,
+            "ignoreUrls": true,
+            "ignoreRegExpLiterals": true
+          }
         ]
     }
 }
