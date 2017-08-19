@@ -1,6 +1,8 @@
 React Conveyor
 ==============
 
+[![npm version](https://img.shields.io/npm/v/react-conveyor.svg?style=flat)](https://www.npmjs.com/package/react-conveyor)
+
 Very basic React wrapper / Hoc to abstract async data fetching through promises. 
 
 There are plenty of similar implementations and more complete data-fetching solutions floating around but the original inspirations were [Relay](https://facebook.github.io/relay/) (explains the internal `fragment` naming) and [heroku/react-refetch](https://github.com/heroku/react-refetch). This is mostly to unify the multiple iterations I had in various projects since we started using it at work. Original name was `DataProvider`, but well ... all similar combinations I could think of were taken on npm so `ReactConveyor` / `Conveyor` it is.
