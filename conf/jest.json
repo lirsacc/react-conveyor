@@ -1,0 +1,16 @@
+{
+  "rootDir": "..",
+  "verbose": true,
+  "bail": true,
+  "testRegex": "test/test-[a-z-]*\\.(js|jsx)$",
+  "collectCoverage": false,
+  "collectCoverageFrom": [
+    "src/**"
+  ],
+  "coverageReporters": ["json", "text", "lcov"],
+  "coverageDirectory": "coverage",
+  "mapCoverage": true,
+  "transform": {
+    "^.+\\.(js|jsx)$": "<rootDir>/test/_processor.js"
+  }
+}
