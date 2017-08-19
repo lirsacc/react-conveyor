@@ -2,14 +2,34 @@
   "name": "react-conveyor",
   "version": "0.0.1",
   "description": "",
-  "scripts": {
-    "build": "rm -rf dist && ./node_modules/.bin/rollup -c conf/rollup.config.js",
-    "lint": "./node_modules/.bin/eslint -c .eslintrc.json --ignore-path .gitignore --ext js,jsx src test",
-    "test": "./node_modules/.bin/jest -c conf/jest.json",
-    "test:with-coverage": "npm run test -- --coverage"
-  },
   "author": "lirsacc <c.lirsac@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "github:lirsacc/react-conveyor"
+  },
+  "bugs": {
+    "url": "https://github.com/lirsacc/react-conveyor/issues"
+  },
+  "homepage": "https://github.com/lirsacc/react-conveyor",
+  "main": "dist/index.js",
+  "module": "dist/es.js",
+  "jsnext:main": "dist/es.js",
+  "scripts": {
+    "build": "rm -rf dist && rollup -c conf/rollup.config.js",
+    "postbuild": "sed -i 'N;/^\\n$/d;P;D' dist/*.js",
+
+    "lint": "eslint -c .eslintrc.json --ignore-path .gitignore --ext js,jsx src test",
+
+    "test": "jest -c conf/jest.json",
+    "coverage": "npm run test -- --coverage",
+
+    "prepublish": "npm run lint && npm run coverage && npm run build"
+  },
+  "peerDependencies": {
+    "react": "^0.14.0 || ^15.0.0",
+    "prop-types": "^15.0.0"
+  },
   "devDependencies": {
     "babel-jest": "^20.0.3",
     "babel-plugin-external-helpers": "^6.22.0",
@@ -31,6 +51,13 @@
     "react-test-renderer": "^15.6.1",
     "rollup": "^0.47.6",
     "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-filesize": "^1.4.2",
     "sinon": "^3.2.1"
-  }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
 }

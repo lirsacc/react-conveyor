@@ -1,6 +1,8 @@
 /* eslint-disable */
 const pkg = require(`${process.cwd()}/package.json`);
-const peerDeps = Object.keys(pkg.peerDependencies);
+const peerDeps = Object.keys(pkg.peerDependencies || {});
+
+const filesize = require('rollup-plugin-filesize')();
 
 const babel = require('rollup-plugin-babel')({
   externalHelpers: false,
@@ -11,12 +13,12 @@ const babel = require('rollup-plugin-babel')({
 module.exports = {
   entry: 'src/index.jsx',
   sourceMap: true,
-  plugins: [babel],
+  plugins: [babel, filesize],
   external: peerDeps,
   targets: [
     {
-    dest: 'dist/index.js',
-    format: 'cjs',
+      dest: 'dist/index.js',
+      format: 'cjs',
     },
     {
       dest: 'dist/es.js',
