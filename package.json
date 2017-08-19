@@ -18,12 +18,9 @@
   "scripts": {
     "build": "rm -rf dist && rollup -c conf/rollup.config.js",
     "postbuild": "sed -i 'N;/^\\n$/d;P;D' dist/*.js",
-
     "lint": "eslint -c .eslintrc.json --ignore-path .gitignore --ext js,jsx src test",
-
     "test": "jest -c conf/jest.json",
     "coverage": "npm run test -- --coverage",
-
     "prepublish": "npm run lint && npm run coverage && npm run build"
   },
   "peerDependencies": {
