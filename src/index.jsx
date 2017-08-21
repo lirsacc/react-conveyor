@@ -155,6 +155,15 @@ export default class ReactConveyor extends PureComponent {
     return promise.then(
       guarded(result => {
         this.setState(this.updateFieldState(mutation, {status: UNDEF}));
+
+        const replacedField = this.props.replaceOnMutation[mutation];
+        if (replacedField in this.props.fields) {
+          this.setState(this.updateFieldState(replacedField, {
+            status: READY,
+            data: result,
+            errors: null,
+          }));
+        }
         return result;
       })
     ).catch(
@@ -275,6 +284,15 @@ ReactConveyor.propTypes = {
   mutations: PropTypes.objectOf(PropTypes.func),
 
   /**
+   * Set this to allow a mutation to replace a field's content on resolve.
+   * Mostly useful for graphql mutations and wrapping forms.
+   * Keys must be in `props.mutations` and values in `props.fields`.
+   *
+   * type: { [key: string]: string }
+   */
+  replaceOnMutation: PropTypes.objectOf(PropTypes.string),
+
+  /**
    * Argument mappers.
    * Must have the same keys as `fields`.
    *
@@ -298,6 +316,7 @@ ReactConveyor.propTypes = {
 ReactConveyor.defaultProps = {
   mapPropsToArgs: {},
   mutations: {},
+  replaceOnMutation: {},
   refresh: 0,
 };
 
@@ -318,12 +337,7 @@ ReactConveyor.mapPropsToArgs = function mapPropsToArgs(props, field) {
 /**
  * Statically wrap a component (standard Higher Order Component pattern).
  *
- * @param {{
- *   fields: { [key: string]: (prop: any) => Promise<any> },
- *   mutations: { [key: string]: (prop: ...any[]) => Promise<any> },
- *   mapPropsToArgs: { [key: string]: (prop: object) => any }|null,
- *   refresh: number|{ [key: string]: number }|null,
- * }} defaultProps - `ReactConveyor` props
+ * @param {object} defaultProps - `ReactConveyor` props, `fields` is mandatory.
  * @param {React.Component|React.StatelessComponent} Component
  * @returns {React.StatelessComponent}
  */

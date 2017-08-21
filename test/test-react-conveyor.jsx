@@ -414,6 +414,45 @@ describe('ReactConveyor', function() {
     });
   });
 
+  it('replaces field content if replaceOnMutation is set', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+
+    const mutations = {
+      mutateFoo: helpers.controlledPromiseFactory(),
+    };
+
+    const replaceOnMutation = {
+      mutateFoo: 'foo',
+    };
+
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations} replaceOnMutation={replaceOnMutation}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    let childProps = wrapper.find(CustomChild).first().props();
+
+    expect(childProps.foo).toBe(1);
+
+    childProps.mutateFoo();
+    mutations.mutateFoo.resolve(0, 2);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(childProps.foo).toBe(2);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.errors).toBe(null);
+  });
+
 });
 
 describe('ReactConveyor.wrapComponent', function() {
