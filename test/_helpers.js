@@ -9,11 +9,11 @@ export async function sleep(ms) {
  * or resolved for orchestration purposes.
  * They are also sinon.js spies.
  */
-export function controlledPromiseFactory () {
+export function controlledPromiseFactory() {
 
   const calls = [];
 
-  function func (...args) {
+  function func(...args) {
 
     let _resolve, _reject;
 
@@ -32,7 +32,7 @@ export function controlledPromiseFactory () {
     return q;
   }
 
-  function _call (index) {
+  function _call(index) {
     const call = calls[index];
     if (!call) {
       throw new ReferenceError(`No call at ${index}`);

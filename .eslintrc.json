@@ -72,6 +72,14 @@
             "ignoreUrls": true,
             "ignoreRegExpLiterals": true
           }
+        ],
+        "func-call-spacing": [
+          "error",
+          "never"
+        ],
+        "space-before-function-paren": [
+          "error",
+          "never"
         ]
     }
 }

@@ -15,7 +15,7 @@ const CustomChild = () => <div></div>;
 
 describe('ReactConveyor', function() {
 
-  it('exposes correct props for initial render', function () {
+  it('exposes correct props for initial render', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -33,7 +33,7 @@ describe('ReactConveyor', function() {
     });
   });
 
-  it('calls all fragments on mounting', function () {
+  it('calls all fragments on mounting', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
     const extraProps = {
@@ -49,7 +49,7 @@ describe('ReactConveyor', function() {
     expect(fetch.bar.args[0]).toEqual([extraProps]);
   });
 
-  it('forwards extra props to children', function () {
+  it('forwards extra props to children', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -62,7 +62,7 @@ describe('ReactConveyor', function() {
     expect(props.someOtherProp).toBe(true);
   });
 
-  it('exposes correct props after mounting', function () {
+  it('exposes correct props after mounting', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -78,7 +78,7 @@ describe('ReactConveyor', function() {
     });
   });
 
-  it('exposes correct props after fragments have resolved / rejected', async function () {
+  it('exposes correct props after fragments have resolved / rejected', async function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
     const wrapper = mount(<Conveyor fetch={fetch}>{children}</Conveyor>);
@@ -101,7 +101,7 @@ describe('ReactConveyor', function() {
     expect(props.reload).toBe(wrapper.instance().reload);
   });
 
-  it('reloads fragments when props change', function () {
+  it('reloads fragments when props change', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = {foo: helpers.controlledPromiseFactory()};
     const wrapper = mount(<Conveyor someProp={1} fetch={fetch}>{children}</Conveyor>);
@@ -115,7 +115,7 @@ describe('ReactConveyor', function() {
     ]);
   });
 
-  it('resolves race conditions when promises resolve in the wrong order', async function () {
+  it('resolves race conditions when promises resolve in the wrong order', async function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = {foo: helpers.controlledPromiseFactory()};
     const wrapper = mount(<Conveyor someProp={1} fetch={fetch}>{children}</Conveyor>);
@@ -141,7 +141,7 @@ describe('ReactConveyor', function() {
     expect(props.errors).toBe(null);
   });
 
-  it('honors `mapPropsToArgs` when calling fragments', function () {
+  it('honors `mapPropsToArgs` when calling fragments', function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -168,7 +168,7 @@ describe('ReactConveyor', function() {
     expect(fetch.bar.args[0]).toEqual([{value: 2}]);
   });
 
-  it('honors `mapPropsToArgs` when receiving props', async function () {
+  it('honors `mapPropsToArgs` when receiving props', async function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -200,7 +200,7 @@ describe('ReactConveyor', function() {
     ]);
   });
 
-  it('only reloads affected fragments when `mapPropsToArgs` return value changes', function () {
+  it('only reloads affected fragments when `mapPropsToArgs` return value changes', function() {
     // Had a case where reloading when the function changed but the result
     // didn't was undesirable.
     const children = props => <CustomChild {...props}/>;
@@ -240,7 +240,7 @@ describe('ReactConveyor', function() {
 
   });
 
-  it('auto-refreshes globally when provided a number', async function () {
+  it('auto-refreshes globally when provided a number', async function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -267,7 +267,7 @@ describe('ReactConveyor', function() {
     expect(fetch.bar.calledThrice).toBe(true);
   });
 
-  it('auto-refreshes per fragment when provided an object', async function () {
+  it('auto-refreshes per fragment when provided an object', async function() {
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
 
@@ -293,7 +293,7 @@ describe('ReactConveyor', function() {
     expect(fetch.bar.calledOnce).toBe(true);
   });
 
-  it('does not auto-refresh until fragment resolves', async function () {
+  it('does not auto-refresh until fragment resolves', async function() {
     // Avoid unnecessary race-conditions and function calls
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
@@ -314,7 +314,7 @@ describe('ReactConveyor', function() {
     expect(fetch.foo.calledTwice).toBe(true);
   });
 
-  it('does not auto-refresh on fragment rejection', async function () {
+  it('does not auto-refresh on fragment rejection', async function() {
     // Avoid unnecessary race-conditions and function calls
     const children = props => <CustomChild {...props}/>;
     const fetch = promiseFactories();
@@ -334,7 +334,7 @@ describe('ReactConveyor', function() {
 });
 
 describe('ReactConveyor.wrapComponent', function() {
-  it('returns a Component function that renders ReactConveyor correctly', function () {
+  it('returns a Component function that renders ReactConveyor correctly', function() {
     const defaultProps = {
       fetch: promiseFactories(),
       mapPropsToArgs: {
