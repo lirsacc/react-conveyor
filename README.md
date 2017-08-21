@@ -37,7 +37,7 @@ ReactDOM.render(
     mapPropsToArgs={{
       user: props => props.userId
     }}
-    fetch={{
+    fields={{
       user: fetchUserData
     }}
   >
@@ -69,7 +69,7 @@ async function fetchUserData(id) {
 }
 
 export default Conveyor.wrapComponent({
-  fetch: {
+  fields: {
     user: fetchUserData
   },
   mapPropsToArgs: {
@@ -87,8 +87,15 @@ The component exposes the following props.
 
 #### `fields` (required): `{ [key: string]: (prop: any) => Promise<any> }`
 
-`field -> loading function`.  
+`field -> loading function`  
 By default the component reloads all fields on mount and whenever its props changes by calling all the loading functions with an object contaning all the **extra** props passed to it.
+
+#### `mutations`: `{ [key: string]: (prop: ...any[]) => Promise<any> }`
+
+`mutationName -> mutator`  
+All mutators will be passed with the same name to the children but be bound to the `Conveyor` instance so that calling it will expose the mutation name in the `inFlight` and `errors` children props as applicable.  
+Keys must not conflict with the `fields` prop.
+
 
 #### `children` (required): `(props: object) => React.ReactNode`
 
@@ -97,11 +104,12 @@ Everytime the status of a field changes (start fetching, promise resolves / or r
 The `props` argument can expect the following props:
 
 - `missing`: List of missing fields. `null` if none are missing.
-- `inFlight`: List of fields for which there is a promise waiting to resolve. `null` if none are currently being fetched.
-- `errors`: map of applicable rejection reasons. `null` if no promise rejected.
+- `inFlight`: List of fields / mutations for which there is a promise waiting to resolve. `null` if none are currently being fetched.
+- `errors`: map of applicable rejection reasons for fields and mutations. `null` if no promise rejected.
 - `reload`: Call this function to force a reload. Can also be called with a field name for a partial reload.
 - `...rest`:
-  - one prop for every member of the `fetch` prop containing the promise resolved value or `undefined`
+  - one prop for every member of the `fields` prop containing the promise resolved value or `undefined`
+  - one prop for every entry in `mutation`.
   - any extra prop passed to `ReactConveyor`
 
 To see if there is any error, missing or loading fields and adapt the display accordingly, a simple truthiness check on `missing`, `inFlight` and `errors` should be sufficient.
