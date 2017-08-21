@@ -102,10 +102,6 @@ export default class ReactConveyor extends PureComponent {
       throw new TypeError(`Invalid fragment ${fragment}. Expected function.`);
     }
 
-    if (this.state.status[fragment] === IN_FLIGHT) {
-      return Promise.resolve();
-    }
-
     this.setState(state => {
       return {
         status: {...state.status, [fragment]: IN_FLIGHT},
