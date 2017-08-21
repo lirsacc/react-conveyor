@@ -21,7 +21,7 @@
     "lint": "eslint -c .eslintrc.json --ignore-path .gitignore --ext js,jsx src test",
     "test": "jest -c conf/jest.json",
     "coverage": "npm run test -- --coverage",
-    "prepublish": "npm run lint && npm run coverage && npm run build"
+    "prepublishOnly": "npm run lint && npm run coverage && npm run build"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0",
