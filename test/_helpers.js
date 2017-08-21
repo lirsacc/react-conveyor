@@ -1,5 +1,8 @@
 import sinon from 'sinon';
 
+/**
+ * Promise version of setTimeout.
+ */
 export async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

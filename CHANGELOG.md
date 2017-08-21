@@ -8,6 +8,7 @@ Changes with version x.x.x
   See: https://docs.npmjs.com/misc/scripts#prepublish-and-prepare.
 - Do not prevent fragments from updating when one promise is already in fight.
 - **Breaking** Rename `fetch` prop to `fields` + all internal mention of `fragment` to `field`.
+- Add basic suport for mutations.
 
 
 Changes with version 0.0.1

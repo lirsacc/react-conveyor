@@ -331,6 +331,89 @@ describe('ReactConveyor', function() {
 
     expect(fields.foo.calledOnce).toBe(true);
   });
+
+  it('it forward mutations to children', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+
+    const mutations = {
+      mutateFoo: helpers.controlledPromiseFactory(),
+    };
+
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    const childProps = wrapper.find(CustomChild).first().props();
+    expect(typeof childProps.mutateFoo).toBe('function');
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.missing).toBe(null);
+    expect(childProps.errors).toBe(null);
+    expect(mutations.mutateFoo.called).toBe(false);
+  });
+
+  it('it forward mutations state to children', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+
+    const mutations = {
+      mutateFoo: helpers.controlledPromiseFactory(),
+    };
+
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    let childProps = wrapper.find(CustomChild).first().props();
+
+    childProps.mutateFoo();
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(mutations.mutateFoo.calledOnce).toBe(true);
+    expect(childProps.inFlight).toEqual(['mutateFoo']);
+    expect(childProps.errors).toBe(null);
+
+    mutations.mutateFoo.resolve(0, 1);
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(mutations.mutateFoo.calledOnce).toBe(true);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.errors).toBe(null);
+
+    childProps.mutateFoo();
+    const err = new Error('Failed mutation.');
+    mutations.mutateFoo.reject(1, err);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(mutations.mutateFoo.calledTwice).toBe(true);
+    expect(childProps.inFlight).toEqual(null);
+    expect(childProps.errors).toEqual({
+      mutateFoo: err,
+    });
+  });
+
 });
 
 describe('ReactConveyor.wrapComponent', function() {
