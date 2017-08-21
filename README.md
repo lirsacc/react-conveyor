@@ -5,7 +5,7 @@ React Conveyor
 
 Very basic React wrapper / Hoc to abstract async data fetching through promises. 
 
-There are plenty of similar implementations and more complete data-fetching solutions floating around but the original inspirations were [Relay](https://facebook.github.io/relay/) (explains the internal `fragment` naming) and [heroku/react-refetch](https://github.com/heroku/react-refetch). This is mostly to unify the multiple iterations I had in various projects since we started using it at work. Original name was `DataProvider`, but well ... all similar combinations I could think of were taken on npm so `ReactConveyor` / `Conveyor` it is.
+There are plenty of similar implementations and more complete data-fetching solutions floating around but the original inspirations were [Relay](https://facebook.github.io/relay/) (explains the internal `fragment` naming used orignally) and [heroku/react-refetch](https://github.com/heroku/react-refetch). This is mostly to unify the multiple iterations I had in various projects since we started using it at work. Original name was `DataProvider`, but well ... all similar combinations I could think of were taken on npm so `ReactConveyor` / `Conveyor` it is.
 
 Usage
 -----
@@ -85,35 +85,35 @@ API
 
 The component exposes the following props.
 
-#### `fetch` (required): `{ [key: string]: (prop: any) => Promise<any> }`
+#### `fields` (required): `{ [key: string]: (prop: any) => Promise<any> }`
 
-`fragment -> loading function`.  
-By default the component reloads all fragments on mount and whenever its props changes by calling all the loading functions with an object contaning all the **extra** props passed to it.
+`field -> loading function`.  
+By default the component reloads all fields on mount and whenever its props changes by calling all the loading functions with an object contaning all the **extra** props passed to it.
 
 #### `children` (required): `(props: object) => React.ReactNode`
 
-Everytime the status of a fragment changes (start fetching, promise resolves / or rejects) this function is called and its return value is rendered directly. 
+Everytime the status of a field changes (start fetching, promise resolves / or rejects) this function is called and its return value is rendered directly. 
 
 The `props` argument can expect the following props:
 
-- `missing`: List of missing fragments. `null` if none are missing.
-- `inFlight`: List of fragments for which there is a promise waiting to resolve. `null` if none are currently being fetched.
+- `missing`: List of missing fields. `null` if none are missing.
+- `inFlight`: List of fields for which there is a promise waiting to resolve. `null` if none are currently being fetched.
 - `errors`: map of applicable rejection reasons. `null` if no promise rejected.
-- `reload`: Call this function to force a reload. Can also be called with a fragment name for a partial reload.
+- `reload`: Call this function to force a reload. Can also be called with a field name for a partial reload.
 - `...rest`:
   - one prop for every member of the `fetch` prop containing the promise resolved value or `undefined`
   - any extra prop passed to `ReactConveyor`
 
-To see if there is any error, missing or loading fragments and adapt the display accordingly, a simple truthiness check on `missing`, `inFlight` and `errors` should be sufficient.
+To see if there is any error, missing or loading fields and adapt the display accordingly, a simple truthiness check on `missing`, `inFlight` and `errors` should be sufficient.
 
 #### `mapPropsToArgs`: `{ [key: string]: (props: object) => any }`
 
-If set for a given fragment:
+If set for a given field:
 
-- The loading function will be called with the result of `props.mapPropsToArgs[fragment](props)`.
-- Whenever the component receives new props the fragment will only reload if the result of `props.mapPropsToArgs['fragment'](props)` for current and next props are different (shallow equality check).
+- The loading function will be called with the result of `props.mapPropsToArgs[field](props)`.
+- Whenever the component receives new props the field will only reload if the result of `props.mapPropsToArgs['field'](props)` for current and next props are different (shallow equality check).
 
 
 #### `refresh`: `number|{ [key: string]: number }`
 
-If set, fragments will reload every `refresh` milliseconds after being successfully loaded. If a `Number` is provided, all fragments are refreshed at the same interval.
+If set, fields will reload every `refresh` milliseconds after being successfully loaded. If a `Number` is provided, all fields are refreshed at the same interval.

@@ -19,9 +19,9 @@ export default class ReactConveyor extends PureComponent {
   constructor(props) {
     super(props);
 
-    const fragments = this.fragments();
+    const fields = this.fields();
 
-    const defaults = defaultValue => fragments.reduce((map, name) => {
+    const defaults = defaultValue => this.fields().reduce((map, name) => {
       map[name] = defaultValue;
       return map;
     }, {});
@@ -37,14 +37,14 @@ export default class ReactConveyor extends PureComponent {
 
     this.reload = this.reload.bind(this);
     this.fetch = this.fetch.bind(this);
-    this.fragments = this.fragments.bind(this);
+    this.fields = this.fields.bind(this);
     this.scheduleRefresh = this.scheduleRefresh.bind(this);
-    this.fragmentsWithStatus = this.fragmentsWithStatus.bind(this);
+    this.fieldsWithStatus = this.fieldsWithStatus.bind(this);
   }
 
   componentDidMount() {
     this._mounted = true;
-    this.fragmentsWithStatus(MISSING).forEach(this.fetch);
+    this.fieldsWithStatus(MISSING).forEach(this.fetch);
   }
 
   componentWillUnmount() {
@@ -56,101 +56,108 @@ export default class ReactConveyor extends PureComponent {
       return;
     }
 
-    const needsReloading = fragment => {
-      const factoryChanged = this.props.fetch[fragment] !== nextProps.fetch[fragment];
+    const needsReloading = field => {
+      const factoryChanged = this.props.fields[field] !== nextProps.fields[field];
       const argsChanged = !shallowEqual(
-        ReactConveyor.mapPropsToArgs(this.props, fragment),
-        ReactConveyor.mapPropsToArgs(nextProps, fragment)
+        ReactConveyor.mapPropsToArgs(this.props, field),
+        ReactConveyor.mapPropsToArgs(nextProps, field)
       );
-      return nextProps.fetch[fragment] && (factoryChanged || argsChanged);
+      return nextProps.fields[field] && (factoryChanged || argsChanged);
     };
 
-    this.fragments().filter(needsReloading).forEach(
-      fragment => this.setState(state => {
+    this.fields().filter(needsReloading).forEach(
+      field => this.setState(
+        this.updateFieldState(field, {status: MISSING, errors: null}),
+        () => this.fetch(field)
+      )
+    );
+  }
+
+  updateFieldState(field, updates) {
+    return state => {
+      return Object.keys(updates).reduce((next, key) => {
         return {
-          status: {...state.status, [fragment]: MISSING},
-          errors: {...state.errors, [fragment]: null},
+          ...next,
+          [key]: {...next[key], [field]: updates[key]}
         };
-      }, () => this.fetch(fragment))
-    );
+      }, state);
+    };
   }
 
-  fragments() {
-    return Object.keys(this.props.fetch);
+  fields() {
+    return Object.keys(this.props.fields);
   }
 
-  fragmentsWithStatus(status) {
-    return this.fragments().filter(name => this.state.status[name] === status);
+  fieldsWithStatus(status) {
+    return this.fields().filter(name => this.state.status[name] === status);
   }
 
-  scheduleRefresh(fragment) {
-    if (this.props.refresh == null) return;
-    const refreshInterval = (
-      typeof this.props.refresh === 'number'
-        ? this.props.refresh
-        : (this.props.refresh[fragment] || 0)
-    );
+  scheduleRefresh(field) {
+    const refreshInterval = typeof this.props.refresh === 'number' ? this.props.refresh : this.props.refresh[field];
     if (refreshInterval > 0) {
-      setTimeout(() => this.fetch(fragment), refreshInterval);
+      setTimeout(() => this.fetch(field), refreshInterval);
     }
   }
 
-  fetch(fragment) {
-    const promiseFactory = this.props.fetch[fragment];
+  fetch(field) {
+    const promiseFactory = this.props.fields[field];
 
     if (typeof promiseFactory !== 'function') {
-      throw new TypeError(`Invalid fragment ${fragment}. Expected function.`);
+      throw new TypeError(`Invalid field ${field}. Expected function.`);
     }
 
-    this.setState(state => {
-      return {
-        status: {...state.status, [fragment]: IN_FLIGHT},
-        errors: {...state.errors, [fragment]: null},
-      };
-    });
+    if (this.state.status[field] === IN_FLIGHT) {
+      return Promise.resolve();
+    }
 
-    const props = ReactConveyor.mapPropsToArgs(this.props, fragment);
-    const promise = promiseFactory(props);
+    this.setState(this.updateFieldState(field, {
+      status: IN_FLIGHT,
+      errors: undefined
+    }));
 
-    this._latestPromise[fragment] = promise;
+    const args = ReactConveyor.mapPropsToArgs(this.props, field);
+    const promise = promiseFactory(args);
+
+    this._latestPromise[field] = promise;
 
     const guarded = func => (...args) => {
-      if (this._mounted && this._latestPromise[fragment] === promise) {
+      if (this._mounted && this._latestPromise[field] === promise) {
         return func(...args);
       }
     };
 
     return promise.then(
-      guarded(result => this.setState(state => {
-        return {
-          status: {...state.status, [fragment]: FETCHED},
-          errors: {...state.errors, [fragment]: undefined},
-          data: {...state.data, [fragment]: result},
-        };
-      }, () => this.scheduleRefresh(fragment)))
+      guarded(result => this.setState(
+        this.updateFieldState(field, {
+          status: FETCHED,
+          data: result,
+          errors: undefined
+        }),
+        () => this.scheduleRefresh(field)
+      ))
     ).catch(
-      error => this.setState(state => {
-        return {
-          status: {...state.status, [fragment]: FAILED},
-          errors: {...state.errors, [fragment]: error},
-          data: {...state.data, [fragment]: undefined},
-        };
-      })
+      guarded(error => this.setState(
+        this.updateFieldState(field, {
+          status: FAILED,
+          data: undefined,
+          errors: error
+        })
+      ))
     );
   }
 
-  reload(fragment) {
-    if (fragment == null) {
-      this.fragments().forEach(this.fetch);
+  reload(field) {
+    if (field == null) {
+      this.fields().forEach(this.fetch);
     } else {
-      this.fetch(fragment);
+      this.fetch(field);
     }
   }
 
   render() {
-    const inFlight = this.fragmentsWithStatus(IN_FLIGHT);
-    const failed = this.fragmentsWithStatus(FAILED);
-    const missing = this.fragmentsWithStatus(MISSING);
+    const inFlight = this.fieldsWithStatus(IN_FLIGHT);
+    const failed = this.fieldsWithStatus(FAILED);
+    const missing = this.fieldsWithStatus(MISSING);
 
     const ifLength = value => value.length ? value : null;
 
@@ -184,11 +191,11 @@ ReactConveyor.propTypes = {
    *
    * type: { [key: string]: (prop: any) => Promise<any> }
    */
-  fetch: PropTypes.objectOf(PropTypes.func).isRequired,
+  fields: PropTypes.objectOf(PropTypes.func).isRequired,
 
   /**
    * Argument mappers.
-   * Must have the same keys as `fetch`.
+   * Must have the same keys as `fields`.
    *
    * type: { [key: string]: (prop: object) => any }
    */
@@ -209,14 +216,15 @@ ReactConveyor.propTypes = {
 
 ReactConveyor.defaultProps = {
   mapPropsToArgs: {},
+  refresh: 0,
 };
 
 ReactConveyor.forwardedProps = function forwardedProps(props) {
   return omit(props, Object.keys(ReactConveyor.propTypes));
 };
 
-ReactConveyor.mapPropsToArgs = function mapPropsToArgs(props, fragment) {
-  const mapper = props.mapPropsToArgs[fragment];
+ReactConveyor.mapPropsToArgs = function mapPropsToArgs(props, field) {
+  const mapper = props.mapPropsToArgs[field];
   const filteredProps = ReactConveyor.forwardedProps(props);
   if (mapper == null) {
     return filteredProps;
@@ -229,7 +237,7 @@ ReactConveyor.mapPropsToArgs = function mapPropsToArgs(props, fragment) {
  * Statically wrap a component (standard Higher Order Component pattern).
  *
  * @param {{
- *   fetch: { [key: string]: (prop: object) => Promise<any> },
+ *   fields: { [key: string]: (prop: object) => Promise<any> },
  *   mapPropsToArgs: { [key: string]: (prop: object) => any }|null,
  *   refresh: number|{ [key: string]: number }|null,
  * }} defaultProps - `ReactConveyor` props
@@ -241,8 +249,8 @@ ReactConveyor.wrapComponent = function wrapComponent(defaultProps, Component) {
   // Avoid outside manipulation after definition
   const staticProps = {...defaultProps};
 
-  if (!('fetch' in staticProps)) {
-    throw TypeError('Expected `fetch` to be provided when wrapping component.');
+  if (!('fields' in staticProps)) {
+    throw TypeError('Expected `fields` to be provided when wrapping component.');
   }
 
   const wrapper = function(props) {
