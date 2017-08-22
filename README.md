@@ -1,7 +1,7 @@
 React Conveyor
 ==============
 
-[![npm version](https://img.shields.io/npm/v/react-conveyor.svg?style=flat)](https://www.npmjs.com/package/react-conveyor)
+[![npm version](https://img.shields.io/npm/v/react-conveyor.svg?style=flat)](https://www.npmjs.com/package/react-conveyor) [![Build Status](https://travis-ci.org/lirsacc/react-conveyor.svg?branch=master)](https://travis-ci.org/lirsacc/react-conveyor)
 
 Very basic React wrapper / Hoc to abstract async data fetching through promises. 
 
