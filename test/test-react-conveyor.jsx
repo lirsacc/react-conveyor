@@ -453,6 +453,46 @@ describe('ReactConveyor', function() {
     expect(childProps.errors).toBe(null);
   });
 
+  it('exposes a reload function to reload single fields', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = promiseFactories();
+
+    const wrapper = mount(<Conveyor fields={fields}>{children}</Conveyor>);
+
+    fields.foo.resolve(0, 'foo');
+    fields.bar.resolve(0, 'bar');
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    const reload = wrapper.find(CustomChild).first().props().reload;
+
+    reload('foo');
+
+    expect(fields.foo.calledTwice).toBe(true);
+    expect(fields.bar.calledOnce).toBe(true);
+  });
+
+  it('exposes a reload function to reload all fields', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = promiseFactories();
+
+    const wrapper = mount(<Conveyor fields={fields}>{children}</Conveyor>);
+
+    fields.foo.resolve(0, 'foo');
+    fields.bar.resolve(0, 'bar');
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    const reload = wrapper.find(CustomChild).first().props().reload;
+
+    reload();
+
+    expect(fields.foo.calledTwice).toBe(true);
+    expect(fields.bar.calledTwice).toBe(true);
+  });
+
 });
 
 describe('ReactConveyor.wrapComponent', function() {
