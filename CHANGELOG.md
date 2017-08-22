@@ -4,6 +4,9 @@ react-conveyor changelog
 Changes with version x.x.x
 --------------------------
 
+Changes with version 0.0.2
+--------------------------
+
 - Change `prepublish` script to `prepublishOnly`.  
   See: https://docs.npmjs.com/misc/scripts#prepublish-and-prepare.
 - Do not prevent fragments from updating when one promise is already in fight.
