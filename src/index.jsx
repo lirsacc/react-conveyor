@@ -284,13 +284,13 @@ ReactConveyor.propTypes = {
   mutations: PropTypes.objectOf(PropTypes.func),
 
   /**
-   * Set this to allow a mutation to replace a field's content on resolve.
+   * Set this to allow a mutation to replace all field values on resolve.
    * Mostly useful for graphql mutations and wrapping forms.
-   * Keys must be in `props.mutations` and values in `props.fields`.
+   * Values must be in `props.mutations`.
    *
-   * type: { [key: string]: string }
+   * type: string[]
    */
-  replaceOnMutation: PropTypes.objectOf(PropTypes.string),
+  replaceOnMutation: PropTypes.arrayOf(PropTypes.string),
 
   /**
    * Argument mappers.

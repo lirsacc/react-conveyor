@@ -414,7 +414,7 @@ describe('ReactConveyor', function() {
     });
   });
 
-  it('replaces field content if replaceOnMutation is set', async function() {
+  it('passes field values to mutations', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
 
@@ -422,9 +422,33 @@ describe('ReactConveyor', function() {
       mutateFoo: helpers.controlledPromiseFactory(),
     };
 
-    const replaceOnMutation = {
-      mutateFoo: 'foo',
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    const childProps = wrapper.find(CustomChild).first().props();
+    const args = [1, 2, 3];
+    childProps.mutateFoo(...args);
+    expect(mutations.mutateFoo.calledOnce).toBe(true);
+    expect(mutations.mutateFoo.args[0]).toEqual([1, 2, 3, {foo: 1}]);
+  });
+
+  it('replaces all fields content if replaceOnMutation is set', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+
+    const mutations = {
+      mutateFoo: helpers.controlledPromiseFactory(),
     };
+
+    const replaceOnMutation = ['mutateFoo'];
 
     const wrapper = mount(
       <Conveyor fields={fields} mutations={mutations} replaceOnMutation={replaceOnMutation}>
@@ -442,7 +466,7 @@ describe('ReactConveyor', function() {
     expect(childProps.foo).toBe(1);
 
     childProps.mutateFoo();
-    mutations.mutateFoo.resolve(0, 2);
+    mutations.mutateFoo.resolve(0, {foo: 2});
 
     await helpers.sleep(0);
     wrapper.update();
@@ -485,14 +509,11 @@ describe('ReactConveyor', function() {
     await helpers.sleep(0);
     wrapper.update();
 
-    const reload = wrapper.find(CustomChild).first().props().reload;
-
-    reload();
+    wrapper.find(CustomChild).first().props().reload();
 
     expect(fields.foo.calledTwice).toBe(true);
     expect(fields.bar.calledTwice).toBe(true);
   });
-
 });
 
 describe('ReactConveyor.wrapComponent', function() {
