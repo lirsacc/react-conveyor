@@ -43,7 +43,6 @@ export default class ReactConveyor extends PureComponent {
     this.fetch = this.fetch.bind(this);
     this.fields = this.fields.bind(this);
     this.mutations = this.mutations.bind(this);
-    this.scheduleRefresh = this.scheduleRefresh.bind(this);
     this.fieldsWithStatus = this.fieldsWithStatus.bind(this);
     this.mutationsWithStatus = this.mutationsWithStatus.bind(this);
     this.boundMutations = this.boundMutations.bind(this);
@@ -106,13 +105,6 @@ export default class ReactConveyor extends PureComponent {
 
   mutationsWithStatus(status) {
     return this.mutations().filter(name => this.state.status[name] === status);
-  }
-
-  scheduleRefresh(field) {
-    const refreshInterval = typeof this.props.refresh === 'number' ? this.props.refresh : this.props.refresh[field];
-    if (refreshInterval > 0) {
-      setTimeout(() => this.fetch(field), refreshInterval);
-    }
   }
 
   boundMutations() {
@@ -207,8 +199,7 @@ export default class ReactConveyor extends PureComponent {
           status: READY,
           data: result,
           errors: undefined
-        }),
-        () => this.scheduleRefresh(field)
+        })
       ))
     ).catch(
       guarded(error => this.setState(
@@ -299,25 +290,12 @@ ReactConveyor.propTypes = {
    * type: { [key: string]: (prop: object) => any }
    */
   mapPropsToArgs: PropTypes.objectOf(PropTypes.func),
-
-  /**
-   * Provide any number greater than 0 to activate auto-refresh
-   * for all (single number) or some of the properties (map of numbers).
-   * Number should be in milliseconds.
-   *
-   * type: number|{ [key: string]: number }|null
-   */
-  refresh: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.objectOf(PropTypes.number),
-  ]),
 };
 
 ReactConveyor.defaultProps = {
   mapPropsToArgs: {},
   mutations: {},
   replaceOnMutation: {},
-  refresh: 0,
 };
 
 ReactConveyor.forwardedProps = function forwardedProps(props) {
