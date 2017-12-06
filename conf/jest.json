@@ -10,7 +10,5 @@
   "coverageReporters": ["json", "text", "lcov"],
   "coverageDirectory": "coverage",
   "mapCoverage": true,
-  "transform": {
-    "^.+\\.(js|jsx)$": "<rootDir>/test/_processor.js"
-  }
+  "setupTestFrameworkScriptFile": "<rootDir>/test/_setup.js"
 }

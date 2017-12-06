@@ -6,8 +6,8 @@ const filesize = require('rollup-plugin-filesize')();
 
 const babel = require('rollup-plugin-babel')({
   externalHelpers: false,
-  exclude: 'node_modules/**',
-  extends: `${__dirname}/babelrc.build.json`
+  exclude: '**/node_modules/**',
+  extends: `${__dirname}/../.babelrc`
 });
 
 module.exports = {

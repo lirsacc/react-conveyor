@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    "syntax-object-rest-spread",
+    "syntax-jsx",
+    ["transform-object-rest-spread", {"useBuiltIns": true}],
+    ["transform-react-jsx", {"useBuiltIns": true}],
+    "transform-react-display-name"
+  ],
+  "presets": [
+    ["es2015", {"modules": false, "loose": true}]
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        ["es2015", {"loose": true}]
+      ]
+    }
+  }
+}
