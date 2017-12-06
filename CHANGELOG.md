@@ -4,6 +4,11 @@ react-conveyor changelog
 Changes with version x.x.x
 --------------------------
 
+Changes with version 0.0.4
+--------------------------
+
+No changes, just fixing a bad `npm publish`.
+
 Changes with version 0.0.3
 --------------------------
 
