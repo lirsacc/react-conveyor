@@ -4,6 +4,12 @@ react-conveyor changelog
 Changes with version x.x.x
 --------------------------
 
+Changes with version 0.0.3
+--------------------------
+
+- Update tests and peerDependencies for React@16
+- Remove `refresh` prop and behaviour
+
 Changes with version 0.0.2
 --------------------------
 
