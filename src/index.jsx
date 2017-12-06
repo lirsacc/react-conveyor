@@ -36,9 +36,6 @@ export default class ReactConveyor extends PureComponent {
     // Will be used to track race conditions during promise resolution.
     this._latestPromise = defaults([...fields, ...mutations], undefined);
 
-    // To avoid generating new functions all the time.
-    this._boundMutationsCache = {};
-
     this.reload = this.reload.bind(this);
     this.fetch = this.fetch.bind(this);
     this.fields = this.fields.bind(this);
@@ -46,7 +43,10 @@ export default class ReactConveyor extends PureComponent {
     this.fieldsWithStatus = this.fieldsWithStatus.bind(this);
     this.mutationsWithStatus = this.mutationsWithStatus.bind(this);
     this.boundMutations = this.boundMutations.bind(this);
-    this.callMutator = this.callMutator.bind(this);
+    this.callMutation = this.callMutation.bind(this);
+
+    // To avoid generating new functions all the time.
+    this._mutations = this.boundMutations();
   }
 
   componentDidMount() {
@@ -82,6 +82,8 @@ export default class ReactConveyor extends PureComponent {
         () => this.fetch(field)
       )
     );
+
+    this._mutations = this.boundMutations();
   }
 
   fields() {
@@ -102,19 +104,13 @@ export default class ReactConveyor extends PureComponent {
 
   boundMutations() {
     return this.mutations().reduce((map, mutation) => {
-      const {cached, original} = this._boundMutationsCache[mutation] || {};
-      const current = this.props.mutations[mutation];
-      if (!(cached && original === current)) {
-        const bound = (...args) => {
-          return this.callMutator(mutation, current, ...args);
-        };
-        this._boundMutationsCache[mutation] = {cached: bound, original: current};
-      }
-      return {...map, [mutation]: this._boundMutationsCache[mutation].cached};
+      const func = this.props.mutations[mutation];
+      const bound = (...args) => this.callMutation(mutation, func, ...args);
+      return { ...map, [mutation]: bound };
     }, {});
   }
 
-  callMutator(mutation, mutator, ...args) {
+  callMutation(mutation, mutator, ...args) {
     if (typeof mutator !== 'function') {
       throw new TypeError(`Invalid mutator ${mutation}. Expected function.`);
     }
@@ -238,7 +234,7 @@ export default class ReactConveyor extends PureComponent {
       errors: failed.length ? this.state.errors : null,
       reload: this.reload,
       ...ReactConveyor.forwardedProps(this.props),
-      ...this.boundMutations(),
+      ...this._mutations,
       ...this.state.data,
     });
   }
