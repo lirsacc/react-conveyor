@@ -74,21 +74,14 @@ export default class ReactConveyor extends PureComponent {
 
     this.fields().filter(needsReloading).forEach(
       field => this.setState(
-        this.updateFieldState(field, {status: UNDEF, errors: null}),
+        state => ({
+          ...state,
+          status: { ...state.status, [field]: UNDEF },
+          errors: { ...state.errors, [field]: null },
+        }),
         () => this.fetch(field)
       )
     );
-  }
-
-  updateFieldState(fieldOrMutation, updates) {
-    return state => {
-      return Object.keys(updates).reduce((next, key) => {
-        return {
-          ...next,
-          [key]: {...next[key], [fieldOrMutation]: updates[key]}
-        };
-      }, state);
-    };
   }
 
   fields() {
@@ -130,9 +123,10 @@ export default class ReactConveyor extends PureComponent {
       return Promise.reject(new Error(`Mutation ${mutation} already in progress.`));
     }
 
-    this.setState(this.updateFieldState(mutation, {
-      status: IN_FLIGHT,
-      errors: null
+    this.setState(state => ({
+      ...state,
+      status: { ...state.status, [mutation]: IN_FLIGHT },
+      errors: { ...state.errors, [mutation]: null },
     }));
 
     const promise = mutator(...args);
@@ -146,22 +140,24 @@ export default class ReactConveyor extends PureComponent {
 
     return promise.then(
       guarded(result => {
-        this.setState(this.updateFieldState(mutation, {status: UNDEF}));
+        this.setState(state => ({...state, status: { ...state.status, [mutation]: UNDEF }}));
 
         const replacedField = this.props.replaceOnMutation[mutation];
         if (replacedField in this.props.fields) {
-          this.setState(this.updateFieldState(replacedField, {
-            status: READY,
-            data: result,
-            errors: null,
+          this.setState(state => ({
+            ...state,
+            status: { ...state.status, [replacedField]: READY },
+            errors: { ...state.errors, [replacedField]: null },
+            data: { ...state.errors, [replacedField]: result },
           }));
         }
         return result;
       })
     ).catch(
-      guarded(error => this.setState(this.updateFieldState(mutation, {
-        status: FAILED,
-        errors: error,
+      guarded(error => this.setState(state => ({
+        ...state,
+        status: { ...state.status, [mutation]: FAILED },
+        errors: { ...state.errors, [mutation]: error },
       })))
     );
   }
@@ -177,9 +173,10 @@ export default class ReactConveyor extends PureComponent {
       return Promise.resolve();
     }
 
-    this.setState(this.updateFieldState(field, {
-      status: IN_FLIGHT,
-      errors: undefined
+    this.setState(state => ({
+      ...state,
+      status: { ...state.status, [field]: IN_FLIGHT },
+      errors: { ...state.errors, [field]: undefined },
     }));
 
     const args = ReactConveyor.mapPropsToArgs(this.props, field);
@@ -195,18 +192,20 @@ export default class ReactConveyor extends PureComponent {
 
     return promise.then(
       guarded(result => this.setState(
-        this.updateFieldState(field, {
-          status: READY,
-          data: result,
-          errors: undefined
+        state => ({
+          ...state,
+          status: { ...state.status, [field]: READY },
+          errors: { ...state.errors, [field]: undefined },
+          data: { ...state.data, [field]: result },
         })
       ))
     ).catch(
       guarded(error => this.setState(
-        this.updateFieldState(field, {
-          status: FAILED,
-          data: undefined,
-          errors: error
+        state => ({
+          ...state,
+          status: { ...state.status, [field]: FAILED },
+          errors: { ...state.errors, [field]: error },
+          data: { ...state.data, [field]: undefined },
         })
       ))
     );
@@ -223,11 +222,11 @@ export default class ReactConveyor extends PureComponent {
   render() {
     const inFlight = [
       ...this.fieldsWithStatus(IN_FLIGHT),
-      ...this.mutationsWithStatus(IN_FLIGHT)
+      ...this.mutationsWithStatus(IN_FLIGHT),
     ];
     const failed = [
       ...this.fieldsWithStatus(FAILED),
-      ...this.mutationsWithStatus(FAILED)
+      ...this.mutationsWithStatus(FAILED),
     ];
     const missing = this.fieldsWithStatus(UNDEF);
 
