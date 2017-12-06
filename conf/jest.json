@@ -9,6 +9,5 @@
   ],
   "coverageReporters": ["json", "text", "lcov"],
   "coverageDirectory": "coverage",
-  "mapCoverage": true,
   "setupTestFrameworkScriptFile": "<rootDir>/test/_setup.js"
 }

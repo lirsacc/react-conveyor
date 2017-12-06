@@ -120,8 +120,3 @@ If set for a given field:
 
 - The loading function will be called with the result of `props.mapPropsToArgs[field](props)`.
 - Whenever the component receives new props the field will only reload if the result of `props.mapPropsToArgs['field'](props)` for current and next props are different (shallow equality check).
-
-
-#### `refresh`: `number|{ [key: string]: number }`
-
-If set, fields will reload every `refresh` milliseconds after being successfully loaded. If a `Number` is provided, all fields are refreshed at the same interval.

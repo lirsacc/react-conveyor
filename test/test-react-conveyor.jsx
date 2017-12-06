@@ -10,7 +10,7 @@ const promiseFactories = () => ({
   bar: helpers.controlledPromiseFactory(),
 });
 
-// `div` triggers a warning when passed invalid props.
+// Wrapper needed because `div` triggers a warning when passed invalid props.
 const CustomChild = () => <div></div>;
 
 describe('ReactConveyor', function() {
@@ -240,98 +240,6 @@ describe('ReactConveyor', function() {
 
   });
 
-  it('auto-refreshes globally when provided a number', async function() {
-    const children = props => <CustomChild {...props}/>;
-    const fields = promiseFactories();
-
-    mount(
-      <Conveyor fields={fields} refresh={20}>
-        {children}
-      </Conveyor>
-    );
-
-    fields.foo.resolve(0, 1);
-    fields.bar.resolve(0, 2);
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledTwice).toBe(true);
-    expect(fields.bar.calledTwice).toBe(true);
-
-    fields.foo.resolve(1, 1);
-    fields.bar.resolve(1, 2);
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledThrice).toBe(true);
-    expect(fields.bar.calledThrice).toBe(true);
-  });
-
-  it('auto-refreshes per field when provided an object', async function() {
-    const children = props => <CustomChild {...props}/>;
-    const fields = promiseFactories();
-
-    mount(
-      <Conveyor fields={fields} refresh={{foo: 20}}>
-        {children}
-      </Conveyor>
-    );
-
-    fields.foo.resolve(0, 1);
-    fields.bar.resolve(0, 2);
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledTwice).toBe(true);
-    expect(fields.bar.calledOnce).toBe(true);
-
-    fields.foo.resolve(1, 1);
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledThrice).toBe(true);
-    expect(fields.bar.calledOnce).toBe(true);
-  });
-
-  it('does not auto-refresh until field resolves', async function() {
-    // Avoid unnecessary race-conditions and function calls
-    const children = props => <CustomChild {...props}/>;
-    const fields = promiseFactories();
-
-    mount(
-      <Conveyor fields={fields} refresh={{foo: 20}}>
-        {children}
-      </Conveyor>
-    );
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledOnce).toBe(true);
-    fields.foo.resolve(0, 1);
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledTwice).toBe(true);
-  });
-
-  it('does not auto-refresh on field rejection', async function() {
-    // Avoid unnecessary race-conditions and function calls
-    const children = props => <CustomChild {...props}/>;
-    const fields = promiseFactories();
-
-    mount(
-      <Conveyor fields={fields} refresh={{foo: 20}}>
-        {children}
-      </Conveyor>
-    );
-
-    fields.foo.reject(0, new Error('Foo failed.'));
-
-    await helpers.sleep(30);
-
-    expect(fields.foo.calledOnce).toBe(true);
-  });
-
   it('it forward mutations to children', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
@@ -506,13 +414,12 @@ describe('ReactConveyor.wrapComponent', function() {
     };
     const ComponentWithData = Conveyor.wrapComponent(defaultProps, CustomChild);
 
-    const wrapper = mount(<ComponentWithData fooInput={1} refresh={5000}/>);
+    const wrapper = mount(<ComponentWithData fooInput={1}/>);
 
     const conveyorProps = wrapper.find(Conveyor).first().props();
 
     expect(conveyorProps.fetch).toBe(defaultProps.fetch);
     expect(conveyorProps.mapPropsToArgs).toBe(defaultProps.mapPropsToArgs);
-    expect(conveyorProps.refresh).toBe(5000);
 
     const childrenProps = wrapper.find(CustomChild).first().props();
 
