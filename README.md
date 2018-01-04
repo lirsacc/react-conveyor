@@ -15,7 +15,7 @@ Install the library:
     npm install react-conveyor
 
 
-- Tested under `React@^15.0.0` but should work for `React@^14.0.0`.
+- Tested under `React@^16.x.x` but should work for `React@^15.0.0` and `React@^0.14.0`.
 - Expects `Object.assign` to be available.
 
 You can wrap components at render time:
