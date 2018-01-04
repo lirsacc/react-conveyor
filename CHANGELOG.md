@@ -4,10 +4,15 @@ react-conveyor changelog
 Changes with version x.x.x
 --------------------------
 
+Changes with version 0.0.5
+--------------------------
+
+- Do not create inline function on each render for wrapped components, it lead to useless re-renders when used inside other components.
+
 Changes with version 0.0.4
 --------------------------
 
-No changes, just fixing a bad `npm publish`.
+- No changes, just fixing a bad `npm publish`.
 
 Changes with version 0.0.3
 --------------------------
