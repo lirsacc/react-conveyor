@@ -323,11 +323,13 @@ ReactConveyor.wrapComponent = function wrapComponent(defaultProps, Component) {
     throw TypeError('Expected `fields` to be provided when wrapping component.');
   }
 
+  const children = renderProps => <Component {...renderProps}/>;
+
   const wrapper = function(props) {
     const conveyorProps = omit({...props, ...staticProps}, ['children']);
     return (
       <ReactConveyor {...conveyorProps}>
-        {renderProps => <Component {...renderProps}/>}
+        {children}
       </ReactConveyor>
     );
   };
