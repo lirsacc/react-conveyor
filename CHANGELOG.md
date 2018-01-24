@@ -4,6 +4,9 @@ react-conveyor changelog
 Changes with version x.x.x
 --------------------------
 
+Changes with version 0.1.0
+--------------------------
+
 Changes with version 0.0.5
 --------------------------
 
