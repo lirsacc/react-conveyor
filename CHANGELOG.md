@@ -1,8 +1,11 @@
 react-conveyor changelog
 ========================
 
-Changes with version x.x.x
+Changes with version 0.2.0
 --------------------------
+
+- Add support for `replaceOnMutation` being a function and replacing multiple fields at once.
+- Fix bug that would nullify mutations after `replaceOnMutation` behaviour came into play.
 
 Changes with version 0.1.0
 --------------------------
