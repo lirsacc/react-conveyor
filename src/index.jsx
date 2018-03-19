@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
-import {shallowEqual, omit} from './utils';
+import {shallowEqual, omit, pick} from './utils';
 
 const UNDEF = 0;
 const FAILED = 1;
@@ -139,12 +139,17 @@ export default class ReactConveyor extends PureComponent {
         this.setState(state => ({...state, status: { ...state.status, [mutation]: UNDEF }}));
 
         const replacedField = this.props.replaceOnMutation[mutation];
-        if (replacedField in this.props.fields) {
+        if (typeof replacedField === 'function' || replacedField in this.props.fields) {
+          const next = (
+            typeof replacedField === 'function'
+              ? pick(replacedField(result), this.fields())
+              : { [replacedField]: result });
+
           this.setState(state => ({
             ...state,
             status: { ...state.status, [replacedField]: READY },
             errors: { ...state.errors, [replacedField]: null },
-            data: { ...state.data, [replacedField]: result },
+            data: { ...state.data, ...next },
           }));
         }
         return result;
@@ -274,9 +279,12 @@ ReactConveyor.propTypes = {
    * Mostly useful for graphql mutations and wrapping forms.
    * Keys must be in `props.mutations` and values in `props.fields`.
    *
-   * type: { [key: string]: string }
+   * type: { [key: string]: string | (any) => { [key: string]: any } }
    */
-  replaceOnMutation: PropTypes.objectOf(PropTypes.string),
+  replaceOnMutation: PropTypes.objectOf(PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.func,
+  ])),
 
   /**
    * Argument mappers.

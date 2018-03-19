@@ -322,7 +322,7 @@ describe('ReactConveyor', function() {
     });
   });
 
-  it('replaces field content if replaceOnMutation is set', async function() {
+  it('replaces field content if replaceOnMutation is set to a fieldname', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
 
@@ -357,6 +357,47 @@ describe('ReactConveyor', function() {
 
     childProps = wrapper.find(CustomChild).first().props();
     expect(childProps.foo).toBe(2);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.errors).toBe(null);
+    expect(childProps.mutateFoo).not.toBe(null);
+  });
+
+  it('replaces field content if replaceOnMutation is set to a function', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+
+    const mutations = {
+      mutateFoo: helpers.controlledPromiseFactory(),
+    };
+
+    const replaceOnMutation = {
+      mutateFoo: x => ({'foo': x * 2, 'bar': 'something'}),
+    };
+
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations} replaceOnMutation={replaceOnMutation}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    let childProps = wrapper.find(CustomChild).first().props();
+
+    expect(childProps.foo).toBe(1);
+
+    childProps.mutateFoo();
+    mutations.mutateFoo.resolve(0, 2);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(childProps.foo).toBe(4);
+    expect(childProps.bar).not.toBeDefined();
     expect(childProps.inFlight).toBe(null);
     expect(childProps.errors).toBe(null);
     expect(childProps.mutateFoo).not.toBe(null);

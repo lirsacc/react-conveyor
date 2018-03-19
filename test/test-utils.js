@@ -1,4 +1,4 @@
-import {omit, shallowEqual} from '../src/utils';
+import {pick, omit, shallowEqual} from '../src/utils';
 
 describe('omit', function() {
 
@@ -12,7 +12,20 @@ describe('omit', function() {
     const input = {foo: 1, bar: 2, baz: 3};
     expect(omit(input, [])).toBe(input);
   });
+});
 
+describe('pick', function() {
+
+  it('picks keys from object', function() {
+    expect(
+      pick({foo: 1, bar: 2, baz: 3}, ['bar'])
+    ).toEqual({bar: 2,});
+  });
+
+  it('does not unnecessarily modify the input', function() {
+    const input = {foo: 1, bar: 2, baz: 3};
+    expect(pick(input, ['foo', 'bar', 'baz'])).toBe(input);
+  });
 });
 
 describe('shallowEqual', function() {

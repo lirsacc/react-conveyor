@@ -38,10 +38,32 @@ export function shallowEqual(obj1, obj2) {
  */
 export function omit(obj, keys) {
   if (!keys || !keys.length) return obj;
+  if (keys.every(key => !(key in obj))) return obj;
+
   return (
     Object
       .keys(obj)
       .filter(key => keys.indexOf(key) === -1)
       .reduce((reduced, key) => ({...reduced, [key]: obj[key]}), {})
   );
+}
+
+
+/**
+ * Pick keys from a plain object.
+ *
+ * @param {object} obj
+ * @param {string[]} keys
+ * @returns {object}
+ */
+export function pick(obj, keys) {
+  if (!keys || !keys.length) return {};
+  const objKeys = Object.keys(obj);
+  const matchingKeys = objKeys.filter(key => keys.indexOf(key) > -1);
+
+  if (matchingKeys.length === objKeys.length) {
+    return obj;
+  } else {
+    return matchingKeys.reduce((reduced, key) => ({...reduced, [key]: obj[key]}), {});
+  }
 }
