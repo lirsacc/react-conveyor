@@ -359,6 +359,7 @@ describe('ReactConveyor', function() {
     expect(childProps.foo).toBe(2);
     expect(childProps.inFlight).toBe(null);
     expect(childProps.errors).toBe(null);
+    expect(childProps.mutateFoo).not.toBe(null);
   });
 
   it('exposes a reload function to reload single fields', async function() {

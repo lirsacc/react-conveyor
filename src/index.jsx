@@ -144,7 +144,7 @@ export default class ReactConveyor extends PureComponent {
             ...state,
             status: { ...state.status, [replacedField]: READY },
             errors: { ...state.errors, [replacedField]: null },
-            data: { ...state.errors, [replacedField]: result },
+            data: { ...state.data, [replacedField]: result },
           }));
         }
         return result;
