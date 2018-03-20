@@ -9,4 +9,6 @@ cache:
   directories:
     - "node_modules"
 
-script: yarn run coverage
+script:
+  - yarn run coverage
+  - yarn run build
