@@ -11,18 +11,19 @@ const babel = require('rollup-plugin-babel')({
 });
 
 module.exports = {
-  entry: 'src/index.jsx',
-  sourceMap: true,
+  input: 'src/index.jsx',
   plugins: [babel, filesize],
   external: peerDeps,
-  targets: [
+  output: [
     {
-      dest: 'dist/index.js',
+      file: 'dist/index.js',
       format: 'cjs',
+      sourcemap: true,
     },
     {
-      dest: 'dist/es.js',
+      file: 'dist/es.js',
       format: 'es',
+      sourcemap: true,
     }
   ]
 };
