@@ -1,6 +1,11 @@
 react-conveyor changelog
 ========================
 
+Changes with version x.x.x
+--------------------------
+
+- Adapt to the new [React 16.3 lifecycle methods and deprecation](https://reactjs.org/blog/2018/03/27/update-on-async-rendering.html#initializing-state). This only uses the existing `componentDidUpdate` instead of `componentWillReceiveProps` so there shouldn't be any change for usage under React@14 and React@15.
+
 Changes with version 0.2.0
 --------------------------
 

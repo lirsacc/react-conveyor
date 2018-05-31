@@ -58,18 +58,16 @@ export default class ReactConveyor extends PureComponent {
     this._mounted = false;
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (shallowEqual(nextProps, this.props)) {
+  componentDidUpdate(prevProps) {
+    if (shallowEqual(prevProps, this.props)) {
       return;
     }
 
     const needsReloading = field => {
-      const factoryChanged = this.props.fields[field] !== nextProps.fields[field];
-      const argsChanged = !shallowEqual(
-        ReactConveyor.mapPropsToArgs(this.props, field),
-        ReactConveyor.mapPropsToArgs(nextProps, field)
-      );
-      return nextProps.fields[field] && (factoryChanged || argsChanged);
+      const factoryChanged = this.props.fields[field] !== prevProps.fields[field];
+      const realArgs = props => ReactConveyor.mapPropsToArgs(props, field);
+      const argsChanged = !shallowEqual(realArgs(this.props), realArgs(prevProps));
+      return this.props.fields[field] && (factoryChanged || argsChanged);
     };
 
     this.fields().filter(needsReloading).forEach(
