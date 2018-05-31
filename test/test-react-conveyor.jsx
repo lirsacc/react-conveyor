@@ -27,8 +27,8 @@ describe('ReactConveyor', function() {
       bar: undefined,
       foo: undefined,
       errors: null,
-      missing: ['foo', 'bar'],
-      inFlight: null,
+      inFlight: ['foo', 'bar'],
+      inFlightMutations: null,
       reload: wrapper.instance().reload,
     });
   });
@@ -72,8 +72,8 @@ describe('ReactConveyor', function() {
       bar: undefined,
       foo: undefined,
       errors: null,
-      missing: null,
       inFlight: ['foo', 'bar'],
+      inFlightMutations: null,
       reload: wrapper.instance().reload,
     });
   });
@@ -97,7 +97,7 @@ describe('ReactConveyor', function() {
     expect(props.bar).toBe(undefined);
     expect(props.errors.bar).toBe(barError);
     expect(props.inFlight).toBe(null);
-    expect(props.missing).toBe(null);
+    expect(props.inFlightMutations).toBe(null);
     expect(props.reload).toBe(wrapper.instance().reload);
   });
 
@@ -262,7 +262,7 @@ describe('ReactConveyor', function() {
     const childProps = wrapper.find(CustomChild).first().props();
     expect(typeof childProps.mutateFoo).toBe('function');
     expect(childProps.inFlight).toBe(null);
-    expect(childProps.missing).toBe(null);
+    expect(childProps.inFlightMutations).toBe(null);
     expect(childProps.errors).toBe(null);
     expect(mutations.mutateFoo.called).toBe(false);
   });
@@ -295,7 +295,8 @@ describe('ReactConveyor', function() {
 
     childProps = wrapper.find(CustomChild).first().props();
     expect(mutations.mutateFoo.calledOnce).toBe(true);
-    expect(childProps.inFlight).toEqual(['mutateFoo']);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.inFlightMutations).toEqual(['mutateFoo']);
     expect(childProps.errors).toBe(null);
 
     mutations.mutateFoo.resolve(0, 1);
@@ -305,6 +306,7 @@ describe('ReactConveyor', function() {
     childProps = wrapper.find(CustomChild).first().props();
     expect(mutations.mutateFoo.calledOnce).toBe(true);
     expect(childProps.inFlight).toBe(null);
+    expect(childProps.inFlightMutations).toBe(null);
     expect(childProps.errors).toBe(null);
 
     childProps.mutateFoo();
@@ -469,8 +471,8 @@ describe('ReactConveyor.wrapComponent', function() {
       bar: undefined,
       foo: undefined,
       errors: null,
-      missing: null,
       inFlight: ['foo', 'bar'],
+      inFlightMutations: null,
       fooInput: 1,
     });
   });

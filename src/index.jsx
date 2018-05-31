@@ -8,6 +8,11 @@ const FAILED = 1;
 const IN_FLIGHT = 2;
 const READY = 3;
 
+const _mapWithDefaults = (keys, defaultValue) => keys.reduce((map, name) => {
+  map[name] = defaultValue;
+  return map;
+}, {});
+
 /**
  * Very basic Higher order component to abstract data fetching through promises.
  *
@@ -22,19 +27,14 @@ export default class ReactConveyor extends PureComponent {
     const fields = this.fields();
     const mutations = this.mutations();
 
-    const defaults = (keys, defaultValue) => keys.reduce((map, name) => {
-      map[name] = defaultValue;
-      return map;
-    }, {});
-
     this.state = {
-      status: defaults([...fields, ...mutations], UNDEF),
-      data: defaults(fields, undefined),
-      errors: defaults([...fields, ...mutations], undefined),
+      status: _mapWithDefaults([...fields, ...mutations], UNDEF),
+      data: _mapWithDefaults(fields, undefined),
+      errors: _mapWithDefaults([...fields, ...mutations], undefined),
     };
 
     // Will be used to track race conditions during promise resolution.
-    this._latestPromise = defaults([...fields, ...mutations], undefined);
+    this._latestPromise = _mapWithDefaults([...fields, ...mutations], undefined);
 
     this.reload = this.reload.bind(this);
     this.fetch = this.fetch.bind(this);
@@ -221,19 +221,19 @@ export default class ReactConveyor extends PureComponent {
   render() {
     const inFlight = [
       ...this.fieldsWithStatus(IN_FLIGHT),
-      ...this.mutationsWithStatus(IN_FLIGHT),
+      ...this.fieldsWithStatus(UNDEF),
     ];
+    const inFlightMutations = this.mutationsWithStatus(IN_FLIGHT);
     const failed = [
       ...this.fieldsWithStatus(FAILED),
       ...this.mutationsWithStatus(FAILED),
     ];
-    const missing = this.fieldsWithStatus(UNDEF);
 
     const ifLength = value => value.length ? value : null;
 
     return this.props.children({
-      missing: ifLength(missing),
       inFlight: ifLength(inFlight),
+      inFlightMutations: ifLength(inFlightMutations),
       errors: failed.length ? this.state.errors : null,
       reload: this.reload,
       ...ReactConveyor.forwardedProps(this.props),
@@ -245,11 +245,11 @@ export default class ReactConveyor extends PureComponent {
 
 ReactConveyor.propTypes = {
   /**
-   * Children as a function.
+   * Render prop: this is your component.
    *
    * type: (props: {
-   *    missing: string[]|null,
    *    inFlight: string[]|null,
+   *    inFlightMutations: string[]|null,
    *    errors: { [key: string]: Error }|null,
    *    reload: () => void,
    *    ...rest: object,
@@ -299,8 +299,10 @@ ReactConveyor.defaultProps = {
   replaceOnMutation: {},
 };
 
+const _CONVEYOR_PROPS = Object.keys(ReactConveyor.propTypes);
+
 ReactConveyor.forwardedProps = function forwardedProps(props) {
-  return omit(props, Object.keys(ReactConveyor.propTypes));
+  return omit(props, _CONVEYOR_PROPS);
 };
 
 ReactConveyor.mapPropsToArgs = function mapPropsToArgs(props, field) {

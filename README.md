@@ -93,7 +93,7 @@ By default the component reloads all fields on mount and whenever its props chan
 #### `mutations`: `{ [key: string]: (prop: ...any[]) => Promise<any> }`
 
 `mutationName -> mutator`  
-All mutators will be passed with the same name to the children but bound to the `Conveyor` instance so that calling it will expose the mutation name in the `inFlight` and `errors` children props as applicable.  
+All mutators will be passed with the same name to the children but bound to the `Conveyor` instance so that calling it will expose the mutation name in the `inFlightMutations` and `errors` children props as applicable.  
 Keys must not conflict with the `fields` prop.
 
 
@@ -103,8 +103,8 @@ Every time the status of a field changes (start fetching, promise resolves / or 
 
 The `props` argument can expect the following props:
 
-- `missing`: List of missing fields. `null` if none are missing.
-- `inFlight`: List of fields / mutations for which there is a promise waiting to resolve. `null` if none are being fetched.
+- `inFlight`: List of fields for which there is a promise waiting to resolve. `null` if none are being fetched.
+- `inFlightMutations`: List of mutations for which there is a promise waiting to resolve. `null` if none are being fetched.
 - `errors`: map of applicable rejection reasons for fields and mutations. `null` if no promise rejected.
 - `reload`: Call this function to force a reload. Can also be called with a field name for a partial reload.
 - `...rest`:
