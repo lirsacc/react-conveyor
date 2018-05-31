@@ -9,6 +9,7 @@ Changes with version x.x.x
   - Do not expose internal `missing` state anymore and fold it into `inFlight`
   - Split `inFLight` into `inFlight` and `inFlightMutations` to make it easier
     to consume and display conditional loading state
+- Remove `replaceOnMutation` in favor of implicit promise resolve value
 
 Changes with version 0.2.0
 --------------------------

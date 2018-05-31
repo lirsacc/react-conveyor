@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
 
-import {shallowEqual, omit, pick} from './utils';
+import {shallowEqual, omit, pick, isObject, isFunction} from './utils';
 
 const UNDEF = 0;
 const FAILED = 1;
@@ -109,7 +109,7 @@ export default class ReactConveyor extends PureComponent {
   }
 
   callMutation(mutation, mutator, ...args) {
-    if (typeof mutator !== 'function') {
+    if (!isFunction(mutator)) {
       throw new TypeError(`Invalid mutator ${mutation}. Expected function.`);
     }
 
@@ -134,37 +134,43 @@ export default class ReactConveyor extends PureComponent {
 
     return promise.then(
       guarded(result => {
+
+        let nextData = null;
+
+        if (isFunction(result)) {
+          nextData = result(this.state.data);
+        } else {
+          nextData = result;
+        }
+
         this.setState(state => ({...state, status: { ...state.status, [mutation]: UNDEF }}));
 
-        const replacedField = this.props.replaceOnMutation[mutation];
-        if (typeof replacedField === 'function' || replacedField in this.props.fields) {
-          const next = (
-            typeof replacedField === 'function'
-              ? pick(replacedField(result), this.fields())
-              : { [replacedField]: result });
+        if (isObject(nextData)) {
+          nextData = pick(nextData, this.fields());
+          const replaced = Object.keys(nextData);
 
           this.setState(state => ({
             ...state,
-            status: { ...state.status, [replacedField]: READY },
-            errors: { ...state.errors, [replacedField]: null },
-            data: { ...state.data, ...next },
+            status: { ...state.status, ..._mapWithDefaults(replaced, READY) },
+            errors: { ...state.errors, ..._mapWithDefaults(replaced, null) },
+            data: { ...state.data, ...nextData },
           }));
         }
-        return result;
-      })
-    ).catch(
-      guarded(error => this.setState(state => ({
+      }),
+    ).catch(guarded(error => {
+      this.setState(state => ({
         ...state,
         status: { ...state.status, [mutation]: FAILED },
         errors: { ...state.errors, [mutation]: error },
-      })))
-    );
+      }));
+      throw error;
+    }));
   }
 
   fetch(field) {
     const promiseFactory = this.props.fields[field];
 
-    if (typeof promiseFactory !== 'function') {
+    if (!isFunction(promiseFactory)) {
       throw new TypeError(`Invalid field ${field}. Expected function.`);
     }
 
@@ -273,18 +279,6 @@ ReactConveyor.propTypes = {
   mutations: PropTypes.objectOf(PropTypes.func),
 
   /**
-   * Set this to allow a mutation to replace a field's content on resolve.
-   * Mostly useful for graphql mutations and wrapping forms.
-   * Keys must be in `props.mutations` and values in `props.fields`.
-   *
-   * type: { [key: string]: string | (any) => { [key: string]: any } }
-   */
-  replaceOnMutation: PropTypes.objectOf(PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.func,
-  ])),
-
-  /**
    * Argument mappers.
    * Must have the same keys as `fields`.
    *
@@ -296,7 +290,6 @@ ReactConveyor.propTypes = {
 ReactConveyor.defaultProps = {
   mapPropsToArgs: {},
   mutations: {},
-  replaceOnMutation: {},
 };
 
 const _CONVEYOR_PROPS = Object.keys(ReactConveyor.propTypes);

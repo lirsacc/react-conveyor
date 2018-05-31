@@ -1,4 +1,5 @@
 import React from 'react';
+import sinon from 'sinon';
 import {mount, shallow} from 'enzyme';
 
 import {omit} from '../src/utils';
@@ -267,7 +268,7 @@ describe('ReactConveyor', function() {
     expect(mutations.mutateFoo.called).toBe(false);
   });
 
-  it('it forward mutations state to children', async function() {
+  it('it forward mutations state to children on success', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
 
@@ -288,7 +289,9 @@ describe('ReactConveyor', function() {
 
     let childProps = wrapper.find(CustomChild).first().props();
 
-    childProps.mutateFoo();
+    const onSucces = sinon.spy();
+    const onFailure = sinon.spy();
+    childProps.mutateFoo().then(onSucces, onFailure);
 
     await helpers.sleep(0);
     wrapper.update();
@@ -309,22 +312,12 @@ describe('ReactConveyor', function() {
     expect(childProps.inFlightMutations).toBe(null);
     expect(childProps.errors).toBe(null);
 
-    childProps.mutateFoo();
-    const err = new Error('Failed mutation.');
-    mutations.mutateFoo.reject(1, err);
-
-    await helpers.sleep(0);
-    wrapper.update();
-
-    childProps = wrapper.find(CustomChild).first().props();
-    expect(mutations.mutateFoo.calledTwice).toBe(true);
-    expect(childProps.inFlight).toEqual(null);
-    expect(childProps.errors).toEqual({
-      mutateFoo: err,
-    });
+    expect(onSucces.calledOnce).toBe(true);
+    expect(onFailure.notCalled).toBe(true);
+    expect(onSucces.args[0]).toEqual([undefined]);
   });
 
-  it('replaces field content if replaceOnMutation is set to a fieldname', async function() {
+  it('it forward mutations state to children on failure', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
 
@@ -332,12 +325,8 @@ describe('ReactConveyor', function() {
       mutateFoo: helpers.controlledPromiseFactory(),
     };
 
-    const replaceOnMutation = {
-      mutateFoo: 'foo',
-    };
-
     const wrapper = mount(
-      <Conveyor fields={fields} mutations={mutations} replaceOnMutation={replaceOnMutation}>
+      <Conveyor fields={fields} mutations={mutations}>
         {children}
       </Conveyor>
     );
@@ -349,10 +338,55 @@ describe('ReactConveyor', function() {
 
     let childProps = wrapper.find(CustomChild).first().props();
 
+    const onSucces = sinon.spy();
+    const onFailure = sinon.spy();
+    childProps.mutateFoo().then(onSucces, onFailure);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(mutations.mutateFoo.calledOnce).toBe(true);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.inFlightMutations).toEqual(['mutateFoo']);
+    expect(childProps.errors).toBe(null);
+
+    const err = new Error('Failed mutation.');
+    mutations.mutateFoo.reject(0, err);
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(mutations.mutateFoo.calledOnce).toBe(true);
+    expect(childProps.inFlight).toEqual(null);
+    expect(childProps.errors).toEqual({mutateFoo: err});
+
+    expect(onSucces.notCalled).toBe(true);
+    expect(onFailure.calledOnce).toBe(true);
+    expect(onFailure.args[0]).toEqual([err]);
+  });
+
+  it('updates fields when mutation resolves to an object', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+    const mutations = {mutateFoo: helpers.controlledPromiseFactory()};
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+    await helpers.sleep(0);
+    wrapper.update();
+
+    let childProps = wrapper.find(CustomChild).first().props();
+
     expect(childProps.foo).toBe(1);
 
     childProps.mutateFoo();
-    mutations.mutateFoo.resolve(0, 2);
+    mutations.mutateFoo.resolve(0, {'foo': 2});
 
     await helpers.sleep(0);
     wrapper.update();
@@ -364,26 +398,17 @@ describe('ReactConveyor', function() {
     expect(childProps.mutateFoo).not.toBe(null);
   });
 
-  it('replaces field content if replaceOnMutation is set to a function', async function() {
+  it('updates fields when mutation resolves to a function', async function() {
     const children = props => <CustomChild {...props}/>;
     const fields = {foo: helpers.controlledPromiseFactory()};
-
-    const mutations = {
-      mutateFoo: helpers.controlledPromiseFactory(),
-    };
-
-    const replaceOnMutation = {
-      mutateFoo: x => ({'foo': x * 2, 'bar': 'something'}),
-    };
-
+    const mutations = {mutateFoo: helpers.controlledPromiseFactory()};
     const wrapper = mount(
-      <Conveyor fields={fields} mutations={mutations} replaceOnMutation={replaceOnMutation}>
+      <Conveyor fields={fields} mutations={mutations}>
         {children}
       </Conveyor>
     );
 
     fields.foo.resolve(0, 1);
-
     await helpers.sleep(0);
     wrapper.update();
 
@@ -392,17 +417,54 @@ describe('ReactConveyor', function() {
     expect(childProps.foo).toBe(1);
 
     childProps.mutateFoo();
-    mutations.mutateFoo.resolve(0, 2);
+    mutations.mutateFoo.resolve(0, ({foo}) => ({foo: foo + 1}));
 
     await helpers.sleep(0);
     wrapper.update();
 
     childProps = wrapper.find(CustomChild).first().props();
-    expect(childProps.foo).toBe(4);
-    expect(childProps.bar).not.toBeDefined();
+    expect(childProps.foo).toBe(2);
     expect(childProps.inFlight).toBe(null);
     expect(childProps.errors).toBe(null);
     expect(childProps.mutateFoo).not.toBe(null);
+  });
+
+  it('updates fields when mutation resolves to a function that throws', async function() {
+    const children = props => <CustomChild {...props}/>;
+    const fields = {foo: helpers.controlledPromiseFactory()};
+    const mutations = {mutateFoo: helpers.controlledPromiseFactory()};
+    const wrapper = mount(
+      <Conveyor fields={fields} mutations={mutations}>
+        {children}
+      </Conveyor>
+    );
+
+    fields.foo.resolve(0, 1);
+    await helpers.sleep(0);
+    wrapper.update();
+
+    let childProps = wrapper.find(CustomChild).first().props();
+
+    expect(childProps.foo).toBe(1);
+
+    const onSucces = sinon.spy();
+    const onFailure = sinon.spy();
+    childProps.mutateFoo().then(onSucces, onFailure);
+
+    mutations.mutateFoo.resolve(0, () => {throw new Error('Bar');});
+
+    await helpers.sleep(0);
+    wrapper.update();
+
+    childProps = wrapper.find(CustomChild).first().props();
+    expect(childProps.foo).toBe(1);
+    expect(childProps.inFlight).toBe(null);
+    expect(childProps.errors).toEqual({mutateFoo: Error('Bar')});
+    expect(childProps.mutateFoo).not.toBe(null);
+
+    expect(onSucces.notCalled).toBe(true);
+    expect(onFailure.calledOnce).toBe(true);
+    expect(onFailure.args[0]).toEqual([Error('Bar')]);
   });
 
   it('exposes a reload function to reload single fields', async function() {

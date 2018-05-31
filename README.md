@@ -93,8 +93,11 @@ By default the component reloads all fields on mount and whenever its props chan
 #### `mutations`: `{ [key: string]: (prop: ...any[]) => Promise<any> }`
 
 `mutationName -> mutator`  
-All mutators will be passed with the same name to the children but bound to the `Conveyor` instance so that calling it will expose the mutation name in the `inFlightMutations` and `errors` children props as applicable.  
-Keys must not conflict with the `fields` prop.
+- All mutators will be passed with the same name to the children but bound to the `Conveyor` instance so that calling it will expose the mutation name in the `inFlightMutations` and `errors` children props as applicable.  
+- Keys must not conflict with the `fields` prop.
+- Mutators can return an object that will then be merged with the current fields
+or a fuction which will be called to get an object that can be merged with the fields.
+
 
 
 #### `children` (required): `(props: object) => React.ReactNode`

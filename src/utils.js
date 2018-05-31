@@ -12,7 +12,7 @@
 export function shallowEqual(obj1, obj2) {
   if (obj1 === obj2) return true;
   if (obj1 == null || obj2 == null) return false;
-  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
+  if (!isObject(obj1) || !isObject(obj2)) return false;
 
   for (let i in obj1) {
     if (!(i in obj2)) {
@@ -66,4 +66,13 @@ export function pick(obj, keys) {
   } else {
     return matchingKeys.reduce((reduced, key) => ({...reduced, [key]: obj[key]}), {});
   }
+}
+
+export function isFunction(value) {
+  return isObject(value) && Object.prototype.toString.call(value) === '[object Function]';
+}
+
+export function isObject(value) {
+  const type = typeof value;
+  return value != null && (type === 'object' || type === 'function');
 }
