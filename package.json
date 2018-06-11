@@ -41,16 +41,16 @@
     "eslint": "^4.12.1",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jest": "^21.4.1",
-    "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-react": "^7.9.1",
     "jest": "^23.1.0",
     "prop-types": "^15.6.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-test-renderer": "^16.4.0",
-    "rollup": "^0.59.4",
+    "rollup": "^0.60.2",
     "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-filesize": "^1.5.0",
-    "sinon": "^5.0.10"
+    "rollup-plugin-filesize": "^2.0.0",
+    "sinon": "^6.0.0"
   },
   "files": [
     "src",
