@@ -14,7 +14,7 @@ const _mapWithDefaults = (keys, defaultValue) => keys.reduce((map, name) => {
 }, {});
 
 /**
- * Very basic Higher order component to abstract data fetching through promises.
+ * Wrapper component to abstract data fetching through promises and render props.
  *
  * @class ReactConveyor
  * @extends {React.PureComponent}
@@ -258,6 +258,7 @@ ReactConveyor.propTypes = {
    *    inFlightMutations: string[]|null,
    *    errors: { [key: string]: Error }|null,
    *    reload: () => void,
+   *    ...fields: object,
    *    ...rest: object,
    * }) => React.ReactNode
    */
@@ -273,6 +274,9 @@ ReactConveyor.propTypes = {
   /**
    * Map of mutation promise factories.
    * Keys must not conflict with `props.fields`.
+   * Resolved values will be used to replace the current state: an object
+   * will be merged with the current fields while a function will be called
+   * to generate the object to be merged.
    *
    * type: { [key: string]: (prop: ...any[]) => Promise<any> }
    */

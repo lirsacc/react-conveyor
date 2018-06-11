@@ -98,8 +98,6 @@ By default the component reloads all fields on mount and whenever its props chan
 - Mutators can return an object that will then be merged with the current fields
 or a fuction which will be called to get an object that can be merged with the fields.
 
-
-
 #### `children` (required): `(props: object) => React.ReactNode`
 
 Every time the status of a field changes (start fetching, promise resolves / or rejects) this function is called and its return value is rendered directly.
