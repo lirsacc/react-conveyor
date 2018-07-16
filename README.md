@@ -1,7 +1,8 @@
 React Conveyor
 ==============
 
-[![npm version](https://img.shields.io/npm/v/react-conveyor.svg?style=flat)](https://www.npmjs.com/package/react-conveyor) [![Build Status](https://travis-ci.org/lirsacc/react-conveyor.svg?branch=master)](https://travis-ci.org/lirsacc/react-conveyor)
+[![npm version](https://img.shields.io/npm/v/react-conveyor.svg?style=flat)](https://www.npmjs.com/package/react-conveyor) [![Build Status](https://travis-ci.org/lirsacc/react-conveyor.svg?branch=master)](https://travis-ci.org/lirsacc/react-conveyor) [![codecov](https://codecov.io/gh/lirsacc/react-conveyor/branch/master/graph/badge.svg)](https://codecov.io/gh/lirsacc/react-conveyor)
+
 
 Basic React wrapper / Hoc to abstract async data fetching through promises.
 
